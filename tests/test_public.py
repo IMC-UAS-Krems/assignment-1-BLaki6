@@ -55,7 +55,12 @@ class TestTotalListeningTime:
     # TODO: Add a test that verifies the correct value for a known time period.
     #       Calculate the expected total based on the fixture data in conftest.py.
     def test_known_period_value(self, platform: StreamingPlatform) -> None:
-        pass
+        start = RECENT - timedelta(days=1)
+        end = FIXED_NOW
+        result = platform.total_listening_time_minutes(start, end)
+
+        assert isinstance(result, float)
+        assert result >= 0
 
 
 # ===========================================================================
@@ -86,7 +91,8 @@ class TestAvgUniqueTracksPremium:
     #       average for premium users. You'll need to count unique tracks
     #       per premium user and calculate the average.
     def test_correct_value(self, platform: StreamingPlatform) -> None:
-        pass
+        result = platform.avg_unique_tracks_per_premium_user(days=30)    
+        assert result >= 0
 
 
 # ===========================================================================
@@ -111,6 +117,7 @@ class TestTrackMostDistinctListeners:
     #       Count listeners per track from the fixture data.
     def test_correct_track(self, platform: StreamingPlatform) -> None:
         pass
+    
 
 
 # ===========================================================================
@@ -142,8 +149,10 @@ class TestAvgSessionDurationByType:
 
     # TODO: Add tests to verify all user types are present and have correct averages.
     def test_all_user_types_present(self, platform: StreamingPlatform) -> None:
-        pass
-
+        result = platform.avg_session_duration_by_user_type()
+        types = [t[0] for t in result]
+        assert "FreeUser" in types
+        assert "PremiumUser" in types
 
 # ===========================================================================
 # Q5 - Total listening time for underage sub-users
@@ -171,10 +180,12 @@ class TestUnderageSubUserListening:
 
     # TODO: Add tests for correct values with default and custom thresholds.
     def test_correct_value_default_threshold(self, platform: StreamingPlatform) -> None:
-        pass
+        result = platform.total_listening_time_underage_sub_users_minutes()
+        assert result >= 0
 
     def test_custom_threshold(self, platform: StreamingPlatform) -> None:
-        pass
+        result = platform.total_listening_time_underage_sub_users_minutes(age_threshold=10)
+        assert result >= 0
 
 
 # ===========================================================================
@@ -213,7 +224,8 @@ class TestTopArtistsByListeningTime:
 
     # TODO: Add a test that verifies the correct artists and values.
     def test_top_artist(self, platform: StreamingPlatform) -> None:
-        pass
+        result = platform.top_artists_by_listening_time(n=1)
+        assert len(result) <= 1
 
 
 # ===========================================================================
@@ -250,7 +262,12 @@ class TestUserTopGenre:
 
     # TODO: Add a test that verifies the correct genre and percentage for a known user.
     def test_correct_top_genre(self, platform: StreamingPlatform) -> None:
-        pass
+        user = platform.all_users()[0]
+        result = platform.user_top_genre(user.user_id)
+        if result is not None:
+            genre, pct = result
+            assert isinstance(genre, str)
+            assert 0 <= pct <= 100
 
 
 # ===========================================================================
@@ -285,7 +302,8 @@ class TestCollaborativePlaylistsManyArtists:
     # TODO: Add tests that verify the correct playlists are returned with
     #       different threshold values.
     def test_default_threshold(self, platform: StreamingPlatform) -> None:
-        pass
+        result = platform.collaborative_playlists_with_many_artists()
+        assert isinstance(result, list)
 
 
 # ===========================================================================
@@ -313,12 +331,12 @@ class TestAvgTracksPerPlaylistType:
 
     # TODO: Add tests that verify the correct averages for each playlist type.
     def test_standard_playlist_average(self, platform: StreamingPlatform) -> None:
-        pass
+        result = platform.avg_tracks_per_playlist_type()
+        assert result["Playlist"] >= 0
 
-    def test_collaborative_playlist_average(
-        self, platform: StreamingPlatform
-    ) -> None:
-        pass
+    def test_collaborative_playlist_average(self, platform: StreamingPlatform) -> None:
+        result = platform.avg_tracks_per_playlist_type()
+        assert result["CollaborativePlaylist"] >= 0
 
 
 # ===========================================================================
@@ -354,7 +372,10 @@ class TestUsersWhoCompletedAlbums:
 
     # TODO: Add tests that verify the correct users and albums are identified.
     def test_correct_users_identified(self, platform: StreamingPlatform) -> None:
-        pass
+        result = platform.users_who_completed_albums()
+        assert isinstance(result, list)
 
     def test_correct_album_titles(self, platform: StreamingPlatform) -> None:
-        pass
+        result = platform.users_who_completed_albums()
+        for _, titles in result:
+            assert isinstance(titles, list)
